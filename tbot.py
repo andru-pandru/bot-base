@@ -6,25 +6,22 @@ import config
 bot = telebot.TeleBot(config.TOKEN)
 
 
-def execute_sql_commands(sql_commands):
+def execute_sql_command(sql_command):
 
     connection = pymysql.connect(host=config.mysqlhost,
                                  user=config.mysqluser,
                                  password=config.mysqlpassword,
-                                 db=config.mysqldatabase,
-                                 charset='utf8mb4',
-                                 cursorclass=pymysql.cursors.DictCursor)
+                                 db=config.mysqldatabase)
+
+    result = "uuups"
 
     try:
         with connection.cursor() as cursor:
-            for command in sql_commands:
-                cursor.execute(command)
-
-        connection.commit()
-
-        # Fetch any remaining results
-        with connection.cursor() as cursor:
+            cursor.execute("SELECT * FROM tasks")
             result = cursor.fetchall()
+            
+            for row in result:
+                print(row)
 
     except Exception as e:
         # Roll back the transaction 
@@ -38,32 +35,14 @@ def execute_sql_commands(sql_commands):
     return result
 
 
+
 @bot.message_handler(commands=['last'])
-print(execute_sql_commands("use botbase","select * from tasks"))
+def base_init(none):
+    execute_sql_command("use bot_base")
+    result = execute_sql_command("select * from tasks")
 
+    print(result)
 
-
-"""
-def get_data(sql_commands):
-    connection = pymysql.connect  (user=config.mysqluser,
-                                password=config.mysqlpassword,
-                                host=config.mysqlhost, 
-                                database=config.mysqldatabase,
-                                charset='utf8mb4',
-                                cursorclass=pymysql.cursors.DictCursor)
-    
-    print('1')
-    
-  #  sql_commands = ("use bot_base","select * from tasks")
-
-    with connection.cursor() as cursor:
-        for command in sql_commands:
-            cursor.execute(command)
-            data = cursor.fetchall()
-
-    connection.close()
-    bot.send_message(message.chat.id, data)
-"""
 
 
 
