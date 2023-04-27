@@ -6,24 +6,20 @@ import config
 bot = telebot.TeleBot(config.TOKEN)
 
 
-import pymysql.cursors
-
 def execute_sql_commands(sql_commands):
-    # Establish a connection to the MySQL database
-    connection = pymysql.connect(host='your_host',
-                                 user='your_username',
-                                 password='your_password',
-                                 db='your_database',
+
+    connection = pymysql.connect(host=config.mysqlhost,
+                                 user=config.mysqluser,
+                                 password=config.mysqlpassword,
+                                 db=config.mysqldatabase,
                                  charset='utf8mb4',
                                  cursorclass=pymysql.cursors.DictCursor)
 
     try:
-        # Execute the SQL commands
         with connection.cursor() as cursor:
             for command in sql_commands:
                 cursor.execute(command)
 
-        # Commit the changes
         connection.commit()
 
         # Fetch any remaining results
@@ -31,21 +27,19 @@ def execute_sql_commands(sql_commands):
             result = cursor.fetchall()
 
     except Exception as e:
-        # Roll back the transaction if an error occurs
+        # Roll back the transaction 
         connection.rollback()
         print('Error executing SQL commands: {}'.format(e))
         result = None
 
     finally:
-        # Close the connection
         connection.close()
 
-    # Return the results (or None if there was an error)
     return result
 
 
 @bot.message_handler(commands=['last'])
-
+print(execute_sql_commands("use botbase","select * from tasks"))
 
 
 
