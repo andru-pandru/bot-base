@@ -13,15 +13,10 @@ def execute_sql_command(sql_command):
                                  password=config.mysqlpassword,
                                  db=config.mysqldatabase)
 
-    result = "uuups"
-
     try:
         with connection.cursor() as cursor:
-            cursor.execute("SELECT * FROM tasks")
+            cursor.execute(sql_command)
             result = cursor.fetchall()
-            
-            for row in result:
-                print(row)
 
     except Exception as e:
         # Roll back the transaction 
@@ -37,11 +32,15 @@ def execute_sql_command(sql_command):
 
 
 @bot.message_handler(commands=['last'])
-def base_init(none):
+def base_init(message):
     execute_sql_command("use bot_base")
-    result = execute_sql_command("select * from tasks")
+    result = execute_sql_command("select task_name from tasks ORDER BY id DESC LIMIT 1")
+    bot.send_message(message.chat.id,result)
+    bot.send_message(message.chat.id,"----------------------")
+    result = execute_sql_command("select task from tasks ORDER BY id DESC LIMIT 1")
+    bot.send_message(message.chat.id,result)
 
-    print(result)
+
 
 
 
